@@ -688,11 +688,14 @@
 
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc_ZOqkeoOjCzhPNSPe8ON1i9Wj_U0t6Ty7EQcXbMzOfSXI5B_9MV7tM7TaZRdkqn7/exec';
 
+  let closedDatesCache = null;
   async function getClosedDates(){
+    if(closedDatesCache) return closedDatesCache;
     try{
       const res = await fetch(`${APPS_SCRIPT_URL}?cerrados=1`);
       const data = await res.json();
-      return new Set(data.cerrados || []);
+      closedDatesCache = new Set(data.cerrados || []);
+      return closedDatesCache;
     }catch(e){
       console.error('No se pudo comprobar los días cerrados', e);
       return new Set();
@@ -797,6 +800,8 @@
           const picked = availableDates.find(d=>isoDate(d)===btn.dataset.date);
           state.date = picked;
           state.time = null;
+          const area = document.getElementById('slotArea');
+          if(area) area.innerHTML = `<p style="font-family:var(--mono);font-size:12px;color:var(--steel);padding:8px 0;">Buscando horas…</p>`;
           await renderSlots();
           render();
         });
@@ -838,6 +843,8 @@
           render();
           return;
         }
+        const confirmBtnEl = document.getElementById('confirmBtn');
+        if(confirmBtnEl){ confirmBtnEl.disabled = true; confirmBtnEl.textContent = 'Confirmando…'; }
         const dISO = isoDate(state.date);
         const result = await saveBooking(dISO, state.time, {
           name: state.name, phone: state.phone, email: state.email, notes: state.notes,
