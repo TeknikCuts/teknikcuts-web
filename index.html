@@ -738,7 +738,10 @@
     }
   }
 
+  let renderToken = 0;
+
   async function render(){
+    const myToken = ++renderToken;
     renderSteps();
 
     if(state.step === 1){
@@ -767,6 +770,7 @@
     else if(state.step === 2){
       body.innerHTML = `<p style="font-family:var(--mono);font-size:12.5px;color:var(--steel);padding:12px 0;">Cargando disponibilidad…</p>`;
       const cerrados = await getClosedDates();
+      if(myToken !== renderToken) return; // una llamada más reciente ya está tomando el control
       const availableDates = dates.filter(d => !cerrados.has(isoDate(d)));
 
       body.innerHTML = `
@@ -878,8 +882,10 @@
   }
 
   async function renderSlots(){
+    const myToken = renderToken;
     const dISO = isoDate(state.date);
     const booked = await getDayBookings(dISO);
+    if(myToken !== renderToken) return;
     const slots = buildSlots();
     const area = document.getElementById('slotArea');
     if(!area) return;
