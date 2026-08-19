@@ -72,20 +72,19 @@
 (function(){
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc_ZOqkeoOjCzhPNSPe8ON1i9Wj_U0t6Ty7EQcXbMzOfSXI5B_9MV7tM7TaZRdkqn7/exec';
   const PANEL_TOKEN = 'jorge-panel-8f3k2xQ9';
-  const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-
   function pad(n){ return n.toString().padStart(2,'0'); }
   function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-  function mondayOf(d){
-    const date = new Date(d);
-    const day = date.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    date.setDate(date.getDate() + diff);
-    date.setHours(0,0,0,0);
-    return date;
+  function todayStart(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
   }
   function fmtShort(d){
     return d.toLocaleDateString('es-ES', { day:'numeric', month:'short' }).replace('.', '');
+  }
+  function dayLabel(d){
+    const s = d.toLocaleDateString('es-ES', { weekday:'long' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
   function escapeHtml(str){
     return String(str || '').replace(/[&<>"']/g, m => ({
@@ -93,28 +92,30 @@
     }[m]));
   }
 
-  let monday = mondayOf(new Date());
+  // Ventana de 7 días. Por defecto empieza HOY y avanza sola cada día;
+  // Anterior/Siguiente la desplazan manualmente de 7 en 7 para consultar otras fechas.
+  let windowStart = todayStart();
 
   const rangeLabel = document.getElementById('rangeLabel');
   const summary = document.getElementById('summary');
   const main = document.getElementById('main');
 
   document.getElementById('prevBtn').addEventListener('click', ()=>{
-    monday.setDate(monday.getDate()-7);
+    windowStart.setDate(windowStart.getDate()-7);
     load();
   });
   document.getElementById('nextBtn').addEventListener('click', ()=>{
-    monday.setDate(monday.getDate()+7);
+    windowStart.setDate(windowStart.getDate()+7);
     load();
   });
 
   async function load(){
     main.innerHTML = '<div class="status">Cargando citas…</div>';
-    const saturday = new Date(monday);
-    saturday.setDate(monday.getDate()+5);
-    const desde = isoDate(monday);
-    const hasta = isoDate(saturday);
-    rangeLabel.textContent = `${fmtShort(monday)} — ${fmtShort(saturday)}`;
+    const windowEnd = new Date(windowStart);
+    windowEnd.setDate(windowStart.getDate()+6);
+    const desde = isoDate(windowStart);
+    const hasta = isoDate(windowEnd);
+    rangeLabel.textContent = `${fmtShort(windowStart)} — ${fmtShort(windowEnd)}`;
 
     let citas = [];
     let cerrados = new Set();
@@ -130,14 +131,14 @@
       return;
     }
 
-    summary.textContent = `${citas.length} cita${citas.length===1?'':'s'} esta semana`;
+    summary.textContent = `${citas.length} cita${citas.length===1?'':'s'} en estos 7 días`;
 
     try{
       const porDia = {};
-      for(let i=0;i<6;i++){
-        const d = new Date(monday);
-        d.setDate(monday.getDate()+i);
-        porDia[isoDate(d)] = { iso: isoDate(d), label: DIAS[i], date: d, citas: [] };
+      for(let i=0;i<7;i++){
+        const d = new Date(windowStart);
+        d.setDate(windowStart.getDate()+i);
+        porDia[isoDate(d)] = { iso: isoDate(d), label: dayLabel(d), date: d, citas: [] };
       }
       citas.forEach(c=>{
         if(porDia[c.fecha]) porDia[c.fecha].citas.push(c);
