@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TeknikCuts — Barbería en Fuengirola</title>
+<meta name="description" content="Barbería en el centro de Fuengirola. Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto — primer corte gratis para nuevos clientes.">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TeknikCuts">
+<meta property="og:title" content="TeknikCuts — Barbería en Fuengirola">
+<meta property="og:description" content="Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto — primer corte gratis para nuevos clientes.">
+<meta property="og:image" content="https://teknikcuts.github.io/teknikcuts-web/og-image.jpg">
+<meta property="og:url" content="https://teknikcuts.github.io/teknikcuts-web/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TeknikCuts — Barbería en Fuengirola">
+<meta name="twitter:description" content="Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto.">
+<meta name="twitter:image" content="https://teknikcuts.github.io/teknikcuts-web/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -245,8 +258,9 @@
     background:var(--white);border:1px solid rgba(0,0,0,0.08);border-radius:6px;
     padding:44px;box-shadow:0 30px 70px -40px rgba(0,0,0,0.35);
   }
-  .steps{display:flex;gap:10px;margin-bottom:36px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ash);}
-  .steps .step{display:flex;align-items:center;gap:8px;}
+  .steps{display:flex;gap:10px;margin-bottom:36px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ash);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .steps::-webkit-scrollbar{display:none;}
+  .steps .step{display:flex;align-items:center;gap:8px;flex-shrink:0;white-space:nowrap;}
   .steps .dot{width:7px;height:7px;border-radius:50%;background:var(--smoke);}
   .steps .step.active{color:var(--ink);}
   .steps .step.active .dot{background:var(--ink);}
@@ -350,7 +364,8 @@
   .foot-brand{display:flex;align-items:center;gap:10px;color:var(--white);}
   .foot-brand img{height:26px;filter:invert(1);}
   .foot-brand span{font-family:var(--display);font-size:14px;}
-  .foot-links{display:flex;gap:22px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;}
+  .foot-links{display:flex;flex-wrap:wrap;gap:16px 22px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;}
+  .foot-links a{white-space:nowrap;}
   .foot-links a:hover{color:var(--white);}
   .foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(255,255,255,0.1);padding-top:22px;font-family:var(--mono);font-size:11px;}
   .foot-bottom .sig{color:var(--steel);}
