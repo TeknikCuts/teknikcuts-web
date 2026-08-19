@@ -727,7 +727,7 @@
       });
       const data = await res.json();
       if(!data.ok){
-        return { ok:false, error: data.error || 'No se ha podido guardar la reserva.' };
+        return { ok:false, error: data.error || 'No se ha podido guardar la reserva.', code: data.code };
       }
       return { ok:true };
     }catch(e){
@@ -738,10 +738,10 @@
 
   async function render(){
     renderSteps();
-    state.error = null;
 
     if(state.step === 1){
       body.innerHTML = `
+        ${state.error ? `<div class="msg err">${state.error}</div>` : ''}
         <div class="chip-row">
           <button class="chip ${state.firstTime===true?'selected':''}" data-ft="true">
             Primera vez<span class="sub">Corte gratis</span>
@@ -756,10 +756,10 @@
         </div>
       `;
       body.querySelectorAll('[data-ft]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ state.firstTime = btn.dataset.ft === 'true'; render(); });
+        btn.addEventListener('click', ()=>{ state.error = null; state.firstTime = btn.dataset.ft === 'true'; render(); });
       });
       const next = document.getElementById('nextBtn');
-      if(next) next.addEventListener('click', ()=>{ state.step = 2; render(); });
+      if(next) next.addEventListener('click', ()=>{ state.error = null; state.step = 2; render(); });
     }
 
     else if(state.step === 2){
@@ -768,6 +768,7 @@
       const availableDates = dates.filter(d => !cerrados.has(isoDate(d)));
 
       body.innerHTML = `
+        ${state.error ? `<div class="msg err">${state.error}</div>` : ''}
         <div style="margin-bottom:22px;">
           <div class="date-row" id="dateRow">
             ${availableDates.map(d=>`
@@ -786,6 +787,7 @@
       `;
       body.querySelectorAll('[data-date]').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
+          state.error = null;
           const picked = availableDates.find(d=>isoDate(d)===btn.dataset.date);
           state.date = picked;
           state.time = null;
@@ -793,9 +795,9 @@
           render();
         });
       });
-      document.getElementById('backBtn').addEventListener('click', ()=>{ state.step=1; render(); });
+      document.getElementById('backBtn').addEventListener('click', ()=>{ state.error = null; state.step=1; render(); });
       const next = document.getElementById('nextBtn');
-      if(next) next.addEventListener('click', ()=>{ state.step=3; render(); });
+      if(next) next.addEventListener('click', ()=>{ state.error = null; state.step=3; render(); });
       if(state.date) await renderSlots();
     }
 
@@ -813,7 +815,7 @@
           <button class="btn dark" id="confirmBtn">Confirmar cita</button>
         </div>
       `;
-      document.getElementById('backBtn').addEventListener('click', ()=>{ state.step=2; render(); });
+      document.getElementById('backBtn').addEventListener('click', ()=>{ state.error = null; state.step=2; render(); });
       document.getElementById('confirmBtn').addEventListener('click', async ()=>{
         state.name = document.getElementById('fName').value.trim();
         state.phone = document.getElementById('fPhone').value.trim();
@@ -831,8 +833,12 @@
         });
         if(!result.ok){
           state.error = result.error || 'Justo se ha ocupado esa hora. Elige otra, por favor.';
-          state.step = 2;
-          await renderSlots();
+          if(result.code === 'promo_used'){
+            state.step = 1;
+          } else {
+            state.step = 2;
+            await renderSlots();
+          }
           render();
           return;
         }
@@ -855,7 +861,7 @@
         </div>
       `;
       document.getElementById('newBooking').addEventListener('click', ()=>{
-        state.step=1; state.firstTime=null; state.date=null; state.time=null; state.name=''; state.phone=''; state.notes='';
+        state.error = null; state.step=1; state.firstTime=null; state.date=null; state.time=null; state.name=''; state.phone=''; state.notes='';
         render();
       });
     }
@@ -872,6 +878,7 @@
     `).join('')}</div>`;
     area.querySelectorAll('[data-time]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
+        state.error = null;
         state.time = btn.dataset.time;
         render();
       });
