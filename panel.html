@@ -117,10 +117,14 @@
     rangeLabel.textContent = `${fmtShort(monday)} — ${fmtShort(saturday)}`;
 
     let citas = [];
+    let cerrados = new Set();
     try{
       const res = await fetch(`${APPS_SCRIPT_URL}?token=${encodeURIComponent(PANEL_TOKEN)}&desde=${desde}&hasta=${hasta}`);
       const data = await res.json();
       citas = data.citas || [];
+      const resCerrados = await fetch(`${APPS_SCRIPT_URL}?cerrados=1`);
+      const dataCerrados = await resCerrados.json();
+      cerrados = new Set(dataCerrados.cerrados || []);
     }catch(e){
       main.innerHTML = '<div class="status">No se han podido cargar las citas. Comprueba tu conexión e inténtalo de nuevo.</div>';
       return;
@@ -133,7 +137,7 @@
       for(let i=0;i<6;i++){
         const d = new Date(monday);
         d.setDate(monday.getDate()+i);
-        porDia[isoDate(d)] = { label: DIAS[i], date: d, citas: [] };
+        porDia[isoDate(d)] = { iso: isoDate(d), label: DIAS[i], date: d, citas: [] };
       }
       citas.forEach(c=>{
         if(porDia[c.fecha]) porDia[c.fecha].citas.push(c);
@@ -143,10 +147,12 @@
         <section class="day">
           <div class="day-head">
             <h2>${dia.label} · ${fmtShort(dia.date)}</h2>
-            <span class="count">${dia.citas.length} cita${dia.citas.length===1?'':'s'}</span>
+            <span class="count">
+              ${cerrados.has(dia.iso) ? '<span class="badge" style="background:var(--steel);margin-right:8px;">Cerrado</span>' : ''}${dia.citas.length} cita${dia.citas.length===1?'':'s'}
+            </span>
           </div>
           ${dia.citas.length === 0
-            ? '<div class="empty">Sin citas</div>'
+            ? `<div class="empty">${cerrados.has(dia.iso) ? 'Cerrado, sin citas' : 'Sin citas'}</div>`
             : dia.citas.map(c => `
               <div class="appt">
                 <div class="time">${escapeHtml(c.hora)}</div>

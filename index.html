@@ -687,6 +687,17 @@
 
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc_ZOqkeoOjCzhPNSPe8ON1i9Wj_U0t6Ty7EQcXbMzOfSXI5B_9MV7tM7TaZRdkqn7/exec';
 
+  async function getClosedDates(){
+    try{
+      const res = await fetch(`${APPS_SCRIPT_URL}?cerrados=1`);
+      const data = await res.json();
+      return new Set(data.cerrados || []);
+    }catch(e){
+      console.error('No se pudo comprobar los días cerrados', e);
+      return new Set();
+    }
+  }
+
   async function getDayBookings(dISO){
     try{
       const res = await fetch(`${APPS_SCRIPT_URL}?fecha=${encodeURIComponent(dISO)}`);
@@ -752,10 +763,14 @@
     }
 
     else if(state.step === 2){
+      body.innerHTML = `<p style="font-family:var(--mono);font-size:12.5px;color:var(--steel);padding:12px 0;">Cargando disponibilidad…</p>`;
+      const cerrados = await getClosedDates();
+      const availableDates = dates.filter(d => !cerrados.has(isoDate(d)));
+
       body.innerHTML = `
         <div style="margin-bottom:22px;">
           <div class="date-row" id="dateRow">
-            ${dates.map(d=>`
+            ${availableDates.map(d=>`
               <button class="date-chip ${state.date && isoDate(state.date)===isoDate(d)?'selected':''}" data-date="${isoDate(d)}">
                 <div class="d">${dayLabel(d)}</div>
                 <div class="n">${d.getDate()}</div>
@@ -771,7 +786,7 @@
       `;
       body.querySelectorAll('[data-date]').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
-          const picked = dates.find(d=>isoDate(d)===btn.dataset.date);
+          const picked = availableDates.find(d=>isoDate(d)===btn.dataset.date);
           state.date = picked;
           state.time = null;
           await renderSlots();
