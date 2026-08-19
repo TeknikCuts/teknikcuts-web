@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeknikCuts — Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0b0b0c; --charcoal:#1c1c1f; --steel:#6e6e73; --ash:#a8a8ad;
+    --smoke:#d9d9dc; --bone:#f2f0eb; --white:#ffffff;
+    --display:'Archivo Black', sans-serif; --body:'Inter', sans-serif; --mono:'Space Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--body);background:var(--bone);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:60px;}
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px;}
+  header{background:var(--ink);color:var(--white);padding:28px 0 22px;}
+  header .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ash);}
+  header h1{font-family:var(--display);text-transform:uppercase;font-size:26px;margin-top:8px;letter-spacing:0.01em;}
+  .weeknav{display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:10px;}
+  .weeknav button{
+    font-family:var(--mono);font-size:12px;letter-spacing:0.05em;text-transform:uppercase;
+    background:transparent;border:1px solid rgba(255,255,255,0.3);color:var(--white);
+    padding:9px 14px;border-radius:20px;cursor:pointer;
+  }
+  .weeknav button:hover{border-color:var(--white);}
+  .weeknav .range{font-family:var(--mono);font-size:13px;color:var(--ash);text-align:center;flex:1;}
+  .summary{font-family:var(--mono);font-size:12px;color:var(--ash);margin-top:14px;}
+
+  main{padding-top:28px;}
+  .day{margin-bottom:26px;}
+  .day-head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:12px;}
+  .day-head h2{font-family:var(--display);text-transform:uppercase;font-size:17px;}
+  .day-head .count{font-family:var(--mono);font-size:11px;color:var(--steel);}
+  .appt{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--smoke);}
+  .appt:last-child{border-bottom:none;}
+  .appt .time{font-family:var(--mono);font-size:15px;font-weight:700;min-width:52px;}
+  .appt .info{flex:1;}
+  .appt .name{font-size:14.5px;font-weight:600;}
+  .appt .name a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--steel);}
+  .appt .notes{font-size:12.5px;color:var(--steel);margin-top:3px;}
+  .badge{
+    font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.05em;
+    background:var(--ink);color:var(--white);padding:3px 8px;border-radius:12px;margin-left:8px;
+    display:inline-block;
+  }
+  .empty{font-family:var(--mono);font-size:12.5px;color:var(--smoke);padding:10px 0;}
+  .status{font-family:var(--mono);font-size:12.5px;color:var(--steel);text-align:center;padding:30px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Uso privado — no compartir este enlace</span>
+    <h1>Panel semanal</h1>
+    <div class="weeknav">
+      <button id="prevBtn">‹ Anterior</button>
+      <div class="range" id="rangeLabel">—</div>
+      <button id="nextBtn">Siguiente ›</button>
+    </div>
+    <div class="summary" id="summary"></div>
+  </div>
+</header>
+<main class="wrap" id="main">
+  <div class="status">Cargando citas…</div>
+</main>
+
+<script>
+(function(){
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc_ZOqkeoOjCzhPNSPe8ON1i9Wj_U0t6Ty7EQcXbMzOfSXI5B_9MV7tM7TaZRdkqn7/exec';
+  const PANEL_TOKEN = 'jorge-panel-8f3k2xQ9';
+  const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function mondayOf(d){
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    date.setDate(date.getDate() + diff);
+    date.setHours(0,0,0,0);
+    return date;
+  }
+  function fmtShort(d){
+    return d.toLocaleDateString('es-ES', { day:'numeric', month:'short' }).replace('.', '');
+  }
+  function escapeHtml(str){
+    return String(str || '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  let monday = mondayOf(new Date());
+
+  const rangeLabel = document.getElementById('rangeLabel');
+  const summary = document.getElementById('summary');
+  const main = document.getElementById('main');
+
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    monday.setDate(monday.getDate()-7);
+    load();
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    monday.setDate(monday.getDate()+7);
+    load();
+  });
+
+  async function load(){
+    main.innerHTML = '<div class="status">Cargando citas…</div>';
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate()+5);
+    const desde = isoDate(monday);
+    const hasta = isoDate(saturday);
+    rangeLabel.textContent = `${fmtShort(monday)} — ${fmtShort(saturday)}`;
+
+    let citas = [];
+    try{
+      const res = await fetch(`${APPS_SCRIPT_URL}?token=${encodeURIComponent(PANEL_TOKEN)}&desde=${desde}&hasta=${hasta}`);
+      const data = await res.json();
+      citas = data.citas || [];
+    }catch(e){
+      main.innerHTML = '<div class="status">No se han podido cargar las citas. Comprueba tu conexión e inténtalo de nuevo.</div>';
+      return;
+    }
+
+    summary.textContent = `${citas.length} cita${citas.length===1?'':'s'} esta semana`;
+
+    const porDia = {};
+    for(let i=0;i<6;i++){
+      const d = new Date(monday);
+      d.setDate(monday.getDate()+i);
+      porDia[isoDate(d)] = { label: DIAS[i], date: d, citas: [] };
+    }
+    citas.forEach(c=>{
+      if(porDia[c.fecha]) porDia[c.fecha].citas.push(c);
+    });
+
+    main.innerHTML = Object.values(porDia).map(dia => `
+      <section class="day">
+        <div class="day-head">
+          <h2>${dia.label} · ${fmtShort(dia.date)}</h2>
+          <span class="count">${dia.citas.length} cita${dia.citas.length===1?'':'s'}</span>
+        </div>
+        ${dia.citas.length === 0
+          ? '<div class="empty">Sin citas</div>'
+          : dia.citas.map(c => `
+            <div class="appt">
+              <div class="time">${escapeHtml(c.hora)}</div>
+              <div class="info">
+                <div class="name">
+                  <a href="tel:${escapeHtml((c.telefono||'').replace(/\s+/g,''))}">${escapeHtml(c.nombre || 'Sin nombre')}</a>
+                  ${c.primeraVez ? '<span class="badge">Primera vez</span>' : ''}
+                </div>
+                ${c.notas ? `<div class="notes">${escapeHtml(c.notas)}</div>` : ''}
+              </div>
+            </div>
+          `).join('')
+        }
+      </section>
+    `).join('');
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
