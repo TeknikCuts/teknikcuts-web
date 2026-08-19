@@ -663,6 +663,7 @@
     time: null,
     name: '',
     phone: '',
+    email: '',
     notes: '',
     error: null
   };
@@ -721,6 +722,7 @@
           hora: time,
           nombre: entry.name,
           telefono: entry.phone,
+          email: entry.email,
           notas: entry.notes,
           primeraVez: entry.firstTime
         })
@@ -809,6 +811,7 @@
         </div>
         <div class="field"><label>Nombre</label><input id="fName" type="text" value="${state.name}" placeholder="Tu nombre"></div>
         <div class="field"><label>Teléfono</label><input id="fPhone" type="tel" value="${state.phone}" placeholder="600 000 000"></div>
+        <div class="field"><label>Email (opcional, para la confirmación)</label><input id="fEmail" type="email" value="${state.email}" placeholder="tucorreo@ejemplo.com"></div>
         <div class="field"><label>Notas (opcional)</label><textarea id="fNotes" rows="2" placeholder="Algo que Jorge deba saber">${state.notes}</textarea></div>
         <div class="booking-nav">
           <button class="btn ghost" id="backBtn">← Atrás</button>
@@ -819,15 +822,21 @@
       document.getElementById('confirmBtn').addEventListener('click', async ()=>{
         state.name = document.getElementById('fName').value.trim();
         state.phone = document.getElementById('fPhone').value.trim();
+        state.email = document.getElementById('fEmail').value.trim();
         state.notes = document.getElementById('fNotes').value.trim();
         if(!state.name || !state.phone){
           state.error = 'Rellena nombre y teléfono para confirmar.';
           render();
           return;
         }
+        if(state.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)){
+          state.error = 'Ese correo no parece válido. Corrígelo o déjalo en blanco.';
+          render();
+          return;
+        }
         const dISO = isoDate(state.date);
         const result = await saveBooking(dISO, state.time, {
-          name: state.name, phone: state.phone, notes: state.notes,
+          name: state.name, phone: state.phone, email: state.email, notes: state.notes,
           firstTime: state.firstTime, price: state.firstTime ? 0 : SERVICE_PRICE,
           createdAt: new Date().toISOString()
         });
@@ -854,6 +863,7 @@
           <div class="mark">✓</div>
           <h3>Cita confirmada</h3>
           <p>Corte · ${dayLabel(state.date)} ${state.date.getDate()} · ${state.time} · ${currentPrice()}</p>
+          ${state.email ? `<p style="font-family:var(--mono);font-size:12px;color:var(--steel);margin-top:-8px;margin-bottom:20px;">Te hemos enviado la confirmación a ${state.email}</p>` : ''}
           <div class="cta-row" style="justify-content:center;display:flex;gap:12px;flex-wrap:wrap;">
             <a class="btn dark" href="https://wa.me/34633660507?text=${waText}" target="_blank" rel="noopener">Avisar a Jorge por WhatsApp</a>
             <button class="btn ghost" id="newBooking">Reservar otra cita</button>
@@ -861,7 +871,7 @@
         </div>
       `;
       document.getElementById('newBooking').addEventListener('click', ()=>{
-        state.error = null; state.step=1; state.firstTime=null; state.date=null; state.time=null; state.name=''; state.phone=''; state.notes='';
+        state.error = null; state.step=1; state.firstTime=null; state.date=null; state.time=null; state.name=''; state.phone=''; state.email=''; state.notes='';
         render();
       });
     }
