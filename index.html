@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TeknikCuts — Barbería en Fuengirola</title>
+<link rel="canonical" href="https://teknikcuts.es/">
 <meta name="description" content="Barbería en el centro de Fuengirola. Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto — primer corte gratis para nuevos clientes.">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -11,12 +12,12 @@
 <meta property="og:site_name" content="TeknikCuts">
 <meta property="og:title" content="TeknikCuts — Barbería en Fuengirola">
 <meta property="og:description" content="Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto — primer corte gratis para nuevos clientes.">
-<meta property="og:image" content="https://teknikcuts.github.io/teknikcuts-web/og-image.jpg">
-<meta property="og:url" content="https://teknikcuts.github.io/teknikcuts-web/">
+<meta property="og:image" content="https://teknikcuts.es/og-image.jpg">
+<meta property="og:url" content="https://teknikcuts.es/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TeknikCuts — Barbería en Fuengirola">
 <meta name="twitter:description" content="Fades limpios, líneas exactas. Reserva tu cita online en menos de un minuto.">
-<meta name="twitter:image" content="https://teknikcuts.github.io/teknikcuts-web/og-image.jpg">
+<meta name="twitter:image" content="https://teknikcuts.es/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -477,7 +478,7 @@
       <p>Elige servicio, día y hora. La cita queda guardada al momento.</p>
     </div>
 
-    <div id="creaner-citas" data-api="https://script.google.com/macros/s/AKfycbxlVxp30GMMAJAJ9HBo49Qr0-83Kt-tPnF-j2ZmUACvaAfT8Pfd0lII0CjF3j5R4Vls0A/exec"></div>
+    <div id="creaner-citas" data-privacidad="privacidad.html" data-api="https://script.google.com/macros/s/AKfycbxlVxp30GMMAJAJ9HBo49Qr0-83Kt-tPnF-j2ZmUACvaAfT8Pfd0lII0CjF3j5R4Vls0A/exec"></div>
     <p class="booking-encourage">Sin llamadas, sin esperas — resérvalo en menos de un minuto.</p>
   </div>
 </section>
@@ -531,7 +532,7 @@
       </div>
     </div>
     <div class="map-frame">
-      <iframe src="https://maps.google.com/maps?q=Fuengirola%2C+M%C3%A1laga%2C+Espa%C3%B1a&t=&z=14&ie=UTF8&iwloc=&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <button type="button" id="ver-mapa" style="width:100%;height:100%;min-height:260px;border:0;background:#e6e4de;color:#0b0b0c;font:600 15px/1.4 var(--body);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">Ver mapa de la zona<span style="font-weight:400;font-size:13px;color:#6e6e73">Se carga Google Maps</span></button>
     </div>
   </div>
 </section>
@@ -552,7 +553,7 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 TeknikCuts · Fuengirola, Málaga</span>
+      <span>© 2026 TeknikCuts · Fuengirola, Málaga · <a href="privacidad.html" style="color:inherit">Privacidad y aviso legal</a></span>
       <span class="sig">música por <b>Teknika</b> <span class="mini-eq"><span></span><span></span><span></span></span></span>
     </div>
   </div>
@@ -622,5 +623,13 @@
 })();
 </script>
 <script src="https://creaner.es/citas/reservas.js" defer></script>
+<script>
+document.getElementById('ver-mapa').addEventListener('click',function(){
+  var f=document.createElement('iframe');
+  f.src='https://maps.google.com/maps?q=Fuengirola%2C+M%C3%A1laga%2C+Espa%C3%B1a&t=&z=14&ie=UTF8&iwloc=&output=embed';
+  f.loading='lazy'; f.referrerPolicy='no-referrer-when-downgrade'; f.title='Mapa de Fuengirola';
+  this.replaceWith(f);
+});
+</script>
 </body>
 </html>
