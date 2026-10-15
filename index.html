@@ -386,6 +386,7 @@
   @media(prefers-reduced-motion:reduce){
     *{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}
   }
+  [hidden]{display:none!important;}
 </style>
 </head>
 <body>
@@ -524,11 +525,11 @@
       <div class="row"><span>Dirección</span><span>Te la enviamos al reservar</span></div>
       <div class="row"><span>Lunes–Sábado</span><span>15:00–21:00</span></div>
       <div class="row"><span>Domingo</span><span>Cerrado</span></div>
-      <div class="row"><span>Teléfono</span><span><a href="tel:+34633660507">633 66 05 07</a> (L–S, 15:00–21:00)</span></div>
+      <div class="row" data-tel hidden><span>Teléfono</span><span><a data-tel-link href="#"><span data-tel-txt></span></a> (L–S, 15:00–21:00)</span></div>
       <div class="row"><span>Email</span><span><a href="mailto:teknikcutsweb@gmail.com">teknikcutsweb@gmail.com</a></span></div>
-      <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
-        <a class="btn dark" href="tel:+34633660507">Llamar</a>
-        <a class="btn outline-dark" href="https://wa.me/34633660507" target="_blank" rel="noopener">WhatsApp</a>
+      <div data-tel hidden style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
+        <a class="btn dark" data-tel-link href="#">Llamar</a>
+        <a class="btn outline-dark" data-tel-wa href="#" target="_blank" rel="noopener">WhatsApp</a>
       </div>
     </div>
     <div class="map-frame">
@@ -549,7 +550,7 @@
         <a href="#servicios">Servicios</a>
         <a href="#reservar">Reservar</a>
         <a href="https://www.instagram.com/teknik_cuts/" target="_blank" rel="noopener">Instagram</a>
-        <a href="tel:+34633660507">633 66 05 07</a>
+        <a data-tel hidden data-tel-link href="#"><span data-tel-txt></span></a>
       </div>
     </div>
     <div class="foot-bottom">
@@ -603,7 +604,7 @@
   // ---------- the one service ----------
   const SERVICE_NAME = 'Corte';
   const SERVICE_PRICE = 5; // €
-  const SERVICE_DUR = '1 hora';
+  const SERVICE_DUR = '50 min';
 
   // ---------- services / promo marketing cards ----------
   const svcGrid = document.getElementById('svcGrid');
@@ -630,6 +631,20 @@ document.getElementById('ver-mapa').addEventListener('click',function(){
   f.loading='lazy'; f.referrerPolicy='no-referrer-when-downgrade'; f.title='Mapa de Fuengirola';
   this.replaceWith(f);
 });
+</script>
+<script>
+/* ===== TELÉFONO DEL NEGOCIO =====
+   Escribe aquí el número (p. ej. '600 123 456') y aparecerá en la ficha de contacto,
+   en los botones Llamar y WhatsApp y en el pie. Vacío = no se muestra en ningún sitio. */
+var TELEFONO = '';
+(function(){
+  var t = String(TELEFONO).trim(); if (!t) return;
+  var d = t.replace(/\D/g, ''); if (d.length === 9) d = '34' + d;
+  document.querySelectorAll('[data-tel-txt]').forEach(function(e){ e.textContent = t; });
+  document.querySelectorAll('[data-tel-link]').forEach(function(e){ e.href = 'tel:+' + d; });
+  document.querySelectorAll('[data-tel-wa]').forEach(function(e){ e.href = 'https://wa.me/' + d; });
+  document.querySelectorAll('[data-tel]').forEach(function(e){ e.hidden = false; });
+})();
 </script>
 </body>
 </html>
